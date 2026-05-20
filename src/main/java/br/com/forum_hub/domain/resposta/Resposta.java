@@ -1,15 +1,7 @@
 package br.com.forum_hub.domain.resposta;
 
-import br.com.forum_hub.domain.topico.Status;
 import br.com.forum_hub.domain.topico.Topico;
-import br.com.forum_hub.infra.exception.RegraDeNegocioException;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
 
@@ -29,7 +21,8 @@ public class Resposta {
     private Topico topico;
 
     @Deprecated
-    public Resposta(){}
+    public Resposta() {
+    }
 
     public Resposta(DadosCadastroResposta dados, Topico topico) {
         this.mensagem = dados.mensagem();

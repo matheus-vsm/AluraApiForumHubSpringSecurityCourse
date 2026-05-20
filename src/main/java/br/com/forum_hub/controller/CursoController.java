@@ -24,7 +24,7 @@ public class CursoController {
 
     @GetMapping
     public ResponseEntity<Page<DadosCurso>> listar(@RequestParam(required = false) Categoria categoria,
-                                                   @PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao){
+                                                   @PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
         var pagina = service.listar(categoria, paginacao);
         return ResponseEntity.ok(pagina);
     }
