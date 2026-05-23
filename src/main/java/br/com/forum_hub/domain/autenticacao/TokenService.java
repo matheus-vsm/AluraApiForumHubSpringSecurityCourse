@@ -35,6 +35,20 @@ public class TokenService {
         }
     }
 
+    public String gerarRefreshToken(Usuario usuario) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            String token = JWT.create()
+                    .withIssuer("Forum Hub")
+                    .withSubject(usuario.getId().toString())
+                    .withExpiresAt(expiracao(120))
+                    .sign(algorithm);
+            return token;
+        } catch (JWTCreationException exception) {
+            throw new RegraDeNegocioException("Erro ao gerar Token JWT de acesso!");
+        }
+    }
+
     public String verificarToken(String token) {
         DecodedJWT decodedJWT;
         try {
@@ -47,20 +61,6 @@ public class TokenService {
             return decodedJWT.getSubject(); // retorna usuario
         } catch (JWTVerificationException exception) {
             throw new RegraDeNegocioException("Erro ao verificar token JWT de acesso!");
-        }
-    }
-
-    public String gerarRefreshToken(Usuario usuario) {
-        try {
-            Algorithm algorithm = Algorithm.HMAC256(secret);
-            String token = JWT.create()
-                    .withIssuer("Forum Hub")
-                    .withSubject(usuario.getId().toString())
-                    .withExpiresAt(expiracao(120))
-                    .sign(algorithm);
-            return token;
-        } catch (JWTCreationException exception) {
-            throw new RegraDeNegocioException("Erro ao gerar Token JWT de acesso!");
         }
     }
 

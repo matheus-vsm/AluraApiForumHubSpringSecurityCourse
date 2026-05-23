@@ -26,7 +26,7 @@ public class SecurityConfig {
     public SecurityFilterChain filtrosSeguranca(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(req -> {
-                    req.requestMatchers("/login").permitAll();
+                    req.requestMatchers("/login", "/atualizar-token").permitAll();
                     req.anyRequest().authenticated();
                 })
                 .sessionManagement(sm -> // Configura o gerenciamento de sessão da aplicação
