@@ -50,6 +50,20 @@ public class TokenService {
         }
     }
 
+    public String gerarRefreshToken(Usuario usuario) {
+        try {
+            Algorithm algorithm = Algorithm.HMAC256(secret);
+            String token = JWT.create()
+                    .withIssuer("Forum Hub")
+                    .withSubject(usuario.getId().toString())
+                    .withExpiresAt(expiracao(120))
+                    .sign(algorithm);
+            return token;
+        } catch (JWTCreationException exception) {
+            throw new RegraDeNegocioException("Erro ao gerar Token JWT de acesso!");
+        }
+    }
+
     private Instant expiracao(Integer minutos) {
         return LocalDateTime.now().plusMinutes(minutos).toInstant(ZoneOffset.of("-03:00"));
     }
