@@ -6,6 +6,7 @@ import br.com.forum_hub.domain.autenticacao.DadosToken;
 import br.com.forum_hub.domain.autenticacao.TokenService;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.domain.usuario.UsuarioRepository;
+import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,8 +37,11 @@ public class AutenticacaoController {
         var autenticationToken = new UsernamePasswordAuthenticationToken(dados.email(), dados.senha());
         var authentication = authenticationManager.authenticate(autenticationToken); // Executa o processo de autenticação usando o token (email e senha), retornando um objeto Authentication com os dados do usuário autenticado
 
+        var usuario = (Usuario) authentication.getPrincipal();
         String tokenAcesso = tokenService.gerarTokenJwt((Usuario) authentication.getPrincipal()); // Gera um token JWT de acesso usando os dados do usuário autenticado (authentication.getPrincipal())
-        String refreshToken = tokenService.gerarRefreshToken((Usuario) authentication.getPrincipal()); // Gera um refresh token
+//        String refreshToken = tokenService.gerarRefreshToken((Usuario) authentication.getPrincipal()); // Gera um refresh token
+        String refreshToken = usuario.novoRefreshToken();
+        usuarioRepository.save(usuario); // Salva o refresh token no banco de dados associado ao usuário, para que possa ser verificado posteriormente durante a atualização do token
 
         return ResponseEntity.ok(new DadosToken(tokenAcesso, refreshToken));
     }
@@ -45,14 +49,19 @@ public class AutenticacaoController {
     @PostMapping("/atualizar-token")
     public ResponseEntity<DadosToken> atualizarToken(@Valid @RequestBody DadosRefreshToken dados) {
         var refreshToken = dados.refreshToken();
-        Long idUsuario = Long.valueOf(tokenService.verificarToken(refreshToken)); // Verifica o refresh token e extrai o ID do usuário associado a ele
-        var usuario = usuarioRepository.findById(idUsuario).orElseThrow(); // Busca o usuário no banco de dados usando o ID extraído do refresh token
+//        Long idUsuario = Long.valueOf(tokenService.verificarToken(refreshToken)); // Verifica o refresh token e extrai o ID do usuário associado a ele
+        var usuario = usuarioRepository.findByRefreshToken(refreshToken)
+                .orElseThrow(() -> new RegraDeNegocioException("Refresh token inválido!"));
+
+        if(usuario.refreshTokenExpirado())
+            throw new RegraDeNegocioException("Refresh token expirado!");
 
         String tokenAcesso = tokenService.gerarTokenJwt(usuario);
-        String tokenAtualizado = tokenService.gerarRefreshToken(usuario);
+//        String tokenAtualizado = tokenService.gerarRefreshToken(usuario);
+        String novoRefreshToken = usuario.novoRefreshToken();
+        usuarioRepository.save(usuario);
 
-        return ResponseEntity.ok(new DadosToken(tokenAcesso, tokenAtualizado));
-
+        return ResponseEntity.ok(new DadosToken(tokenAcesso, novoRefreshToken));
     }
 
 }
