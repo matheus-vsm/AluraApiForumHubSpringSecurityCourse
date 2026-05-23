@@ -21,13 +21,24 @@ public class FiltroTokenAcesso extends OncePerRequestFilter {
         // filterChain.doFilter(request, response); // Continua a cadeia de filtros, permitindo que a requisição seja processada pelos próximos filtros e eventualmente pelo controlador
 
         // recuperar o token de requisição
-        String token;
+        String token = recuperarTokenRequisicao(request);
+
         if (token != null) {
             // validação do token
 
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String recuperarTokenRequisicao(HttpServletRequest request) {
+        var authorizationHeader = request.getHeader("Authorization");
+
+        // outra forma
+//        return authorizationHeader != null && authorizationHeader.startsWith("Bearer ")
+//                ? authorizationHeader.substring(7)
+//                : authorizationHeader;
+        return authorizationHeader == null ? null : authorizationHeader.replace("Bearer ", "");
     }
 
 }
