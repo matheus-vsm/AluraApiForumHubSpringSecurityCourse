@@ -25,6 +25,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filtrosSeguranca(HttpSecurity http) throws Exception {
         return http
+                .authorizeHttpRequests(req -> {
+                    req.requestMatchers("/login").permitAll();
+                    req.anyRequest().authenticated();
+                })
                 .sessionManagement(sm -> // Configura o gerenciamento de sessão da aplicação
                         sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // Define que a aplicação não criará nem usará sessões (stateless), comum em APIs REST que usam token (ex: JWT)
                 .csrf(csrf -> csrf.disable()) // Desativa a proteção CSRF (Cross-Site Request Forgery). Geralmente desabilitado em APIs stateless que não usam cookies para autenticação

@@ -38,7 +38,7 @@ public class TokenService {
     public String verificarToken(String token) {
         DecodedJWT decodedJWT;
         try {
-            Algorithm algorithm = Algorithm.HMAC256("12345678");
+            Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm)
                     .withIssuer("Forum Hub")
                     .build();
