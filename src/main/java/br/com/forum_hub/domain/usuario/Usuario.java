@@ -23,6 +23,12 @@ public class Usuario implements UserDetails {
     private String miniBiografia;
     private String refreshToken;
     private LocalDateTime expiracaoRefreshToken;
+    private Boolean verificado;
+    private String token;
+    private LocalDateTime expiracaoToken;
+
+    public Usuario() {
+    }
 
     public Usuario(DadosCadastroUsuario dados, String senhaCriptografada) {
         this.nomeCompleto = dados.nomeCompleto();
@@ -31,6 +37,9 @@ public class Usuario implements UserDetails {
         this.nomeUsuario = dados.nomeUsuario();
         this.biografia = dados.biografia();
         this.miniBiografia = dados.miniBiografia();
+        this.verificado = false;
+        this.token = UUID.randomUUID().toString();
+        this.expiracaoToken = LocalDateTime.now().plusMinutes(30);
     }
 
     @Override
