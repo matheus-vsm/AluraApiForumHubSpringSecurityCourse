@@ -11,5 +11,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     Optional<Usuario> findByEmailIgnoreCaseAndVerificadoTrue(String email);
 
     Optional<Usuario> findByRefreshToken(String refreshToken);
-    
+
+    Optional<Usuario> findByToken(String codigo);
+
 }
