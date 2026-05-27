@@ -2,11 +2,13 @@ package br.com.forum_hub.controller;
 
 import br.com.forum_hub.domain.resposta.RespostaService;
 import br.com.forum_hub.domain.topico.*;
+import br.com.forum_hub.domain.usuario.Usuario;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -22,8 +24,10 @@ public class TopicoController {
     }
 
     @PostMapping
-    public ResponseEntity<DadosListagemTopico> cadastrar(@RequestBody @Valid DadosCadastroTopico dados, UriComponentsBuilder uriBuilder) {
-        var topico = service.cadastrar(dados);
+    public ResponseEntity<DadosListagemTopico> cadastrar(@RequestBody @Valid DadosCadastroTopico dados,
+                                                         UriComponentsBuilder uriBuilder,
+                                                         @AuthenticationPrincipal Usuario autor) {
+        var topico = service.cadastrar(dados, autor);
         var uri = uriBuilder.path("/topicos/{id}").buildAndExpand(topico.getId()).toUri();
         return ResponseEntity.created(uri).body(new DadosListagemTopico(topico));
     }
