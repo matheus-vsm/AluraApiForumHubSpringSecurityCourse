@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
@@ -30,11 +31,13 @@ public class Usuario implements UserDetails {
     private String token;
     private LocalDateTime expiracaoToken;
     private Boolean ativo;
-    @ManyToMany(fetch = FetchType.EAGER) // os perfis sejam carregados da base IMEDIATAMENTE junto com o usuário, na mesma consulta.
+    @ManyToMany(fetch = FetchType.EAGER)
+    // os perfis sejam carregados da base IMEDIATAMENTE junto com o usuário, na mesma consulta.
     @JoinTable(name = "usuarios_perfis", // cria uma TABELA INTERMEDIÁRIA (também chamada de tabela de junção ou pivot table) para guardar os pares de relacionamento.
             joinColumns = @JoinColumn(name = "usuario_id"), // Define a coluna na tabela intermediária que referencia a chave primária da entidade DONA do relacionamento (Usuario).
-            inverseJoinColumns = @JoinColumn(name = "perfil_id")) // Define a coluna na tabela intermediária que referencia a chave primária da entidade DO OUTRO LADO (Perfil).
-    private List<Perfil> perfis;
+            inverseJoinColumns = @JoinColumn(name = "perfil_id"))
+    // Define a coluna na tabela intermediária que referencia a chave primária da entidade DO OUTRO LADO (Perfil).
+    private List<Perfil> perfis = new ArrayList<>();
 
     public Usuario() {
     }
@@ -50,7 +53,7 @@ public class Usuario implements UserDetails {
         this.token = UUID.randomUUID().toString();
         this.expiracaoToken = LocalDateTime.now().plusMinutes(30);
         this.ativo = false;
-        this.perfis.add(perfil);
+        adicionarPerfil(perfil);
     }
 
     @Override
@@ -138,4 +141,7 @@ public class Usuario implements UserDetails {
         this.senha = senhaCriptografada;
     }
 
+    public void adicionarPerfil(Perfil perfil) {
+        this.perfis.add(perfil);
+    }
 }
