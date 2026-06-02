@@ -30,12 +30,16 @@ public class Usuario implements UserDetails {
     private String token;
     private LocalDateTime expiracaoToken;
     private Boolean ativo;
+    @ManyToMany(fetch = FetchType.EAGER) // os perfis sejam carregados da base IMEDIATAMENTE junto com o usuário, na mesma consulta.
+    @JoinTable(name = "usuarios_perfis", // cria uma TABELA INTERMEDIÁRIA (também chamada de tabela de junção ou pivot table) para guardar os pares de relacionamento.
+            joinColumns = @JoinColumn(name = "usuario_id"), // Define a coluna na tabela intermediária que referencia a chave primária da entidade DONA do relacionamento (Usuario).
+            inverseJoinColumns = @JoinColumn(name = "perfil_id")) // Define a coluna na tabela intermediária que referencia a chave primária da entidade DO OUTRO LADO (Perfil).
     private List<Perfil> perfis;
 
     public Usuario() {
     }
 
-    public Usuario(DadosCadastroUsuario dados, String senhaCriptografada) {
+    public Usuario(DadosCadastroUsuario dados, String senhaCriptografada, Perfil perfil) {
         this.nomeCompleto = dados.nomeCompleto();
         this.email = dados.email();
         this.senha = senhaCriptografada;
@@ -46,6 +50,7 @@ public class Usuario implements UserDetails {
         this.token = UUID.randomUUID().toString();
         this.expiracaoToken = LocalDateTime.now().plusMinutes(30);
         this.ativo = false;
+        this.perfis.add(perfil);
     }
 
     @Override
