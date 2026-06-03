@@ -47,8 +47,12 @@ public class RespostaService {
     }
 
     @Transactional
-    public Resposta atualizar(DadosAtualizacaoResposta dados) {
+    public Resposta atualizar(DadosAtualizacaoResposta dados, Usuario logado) {
         var resposta = buscarPeloId(dados.id());
+
+        if(hierarquiaService.usuarioNaoTemPermissoes(logado, resposta.getTopico().getAutor(), "ROLE_MODERADOR"))
+            throw new AccessDeniedException("Você não pode editar essa resposta!");
+
         return resposta.atualizarInformacoes(dados);
     }
 
@@ -73,9 +77,12 @@ public class RespostaService {
     }
 
     @Transactional
-    public void excluir(Long id) {
+    public void excluir(Long id, Usuario logado) {
         var resposta = buscarPeloId(id);
         var topico = resposta.getTopico();
+
+        if(hierarquiaService.usuarioNaoTemPermissoes(logado, resposta.getTopico().getAutor(), "ROLE_MODERADOR"))
+            throw new AccessDeniedException("Você não pode editar essa resposta!");
 
         repository.deleteById(id);
 

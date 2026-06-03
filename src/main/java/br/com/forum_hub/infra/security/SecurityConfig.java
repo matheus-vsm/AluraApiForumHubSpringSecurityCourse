@@ -44,6 +44,7 @@ public class SecurityConfig {
                     req.requestMatchers(HttpMethod.PATCH, "/topicos/**").hasRole("MODERADOR");
 
                     req.requestMatchers(HttpMethod.PATCH, "/adicionar-perfil/**").hasRole("ADMIN");
+                    req.requestMatchers(HttpMethod.PATCH, "/reativar-conta/**").hasRole("ADMIN");
 
                     req.anyRequest().authenticated();
                 })
