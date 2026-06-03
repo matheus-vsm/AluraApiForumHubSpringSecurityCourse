@@ -4,7 +4,9 @@ import br.com.forum_hub.domain.topico.Status;
 import br.com.forum_hub.domain.topico.TopicoService;
 import br.com.forum_hub.domain.usuario.Usuario;
 import br.com.forum_hub.infra.exception.RegraDeNegocioException;
+import br.com.forum_hub.infra.security.HierarquiaService;
 import jakarta.transaction.Transactional;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -18,12 +20,12 @@ public class RespostaService {
 
     private final TopicoService topicoService;
 
-    private final RoleHierarchy roleHierarchy;
+    private final HierarquiaService hierarquiaService;
 
-    public RespostaService(RespostaRepository repository, TopicoService topicoService, RoleHierarchy roleHierarchy) {
+    public RespostaService(RespostaRepository repository, TopicoService topicoService, RoleHierarchy roleHierarchy, HierarquiaService hierarquiaService) {
         this.repository = repository;
         this.topicoService = topicoService;
-        this.roleHierarchy = roleHierarchy;
+        this.hierarquiaService = hierarquiaService;
     }
 
     @Transactional
@@ -60,8 +62,8 @@ public class RespostaService {
 
         var topico = resposta.getTopico();
 
-        if (!usuarioTemPermissoes(logado, topico.getAutor()))
-            throw new RegraDeNegocioException("Você não tem permissão para marcar esta resposta como solução.");
+        if(hierarquiaService.usuarioNaoTemPermissoes(logado, topico.getAutor(), "ROLE_INSTRUTOR"))
+            throw new AccessDeniedException("Você não pode marcar essa resposta como solução!");
 
         if (topico.getStatus() == Status.RESOLVIDO)
             throw new RegraDeNegocioException("O tópico já foi solucionado! Você não pode marcar mais de uma resposta como solução.");
@@ -87,18 +89,6 @@ public class RespostaService {
     public Resposta buscarPeloId(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new RegraDeNegocioException("Resposta não encontrada!"));
-    }
-
-    private boolean usuarioTemPermissoes(Usuario logado, Usuario autor) {
-        for (GrantedAuthority autoridade : logado.getAuthorities()) {
-            var autoridadesAlcancaveis = roleHierarchy.getReachableGrantedAuthorities(List.of(autoridade));
-
-            for (GrantedAuthority perfil : autoridadesAlcancaveis) {
-                if (perfil.getAuthority().equals("ROLE_INSTRUTOR") || logado.getId().equals(autor.getId()))
-                    return true;
-            }
-        }
-        return false;
     }
 
 }
